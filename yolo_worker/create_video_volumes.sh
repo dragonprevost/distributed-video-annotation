@@ -1,0 +1,2 @@
+sudo docker volume create --name test-video-volume --driver local --opt type=none --opt o=bind --opt device=$(pwd)/test-videos
+sudo docker volume create --name test-video-volume-results --driver local --opt type=none --opt o=bind --opt device=$(pwd)/test-videos-results

@@ -1,0 +1,52 @@
+version: '3.2'
+services:
+  master:
+    container_name: master
+    build:
+      context: ./master_flask
+      args:
+        MASTER_DOWNLOAD_FOLDER: ${MASTER_DOWNLOAD_FOLDER} 
+        MASTER_DATA_FOLDER: ${MASTER_DATA_FOLDER} 
+        MASTER_RESULTS_FOLDER: ${MASTER_RESULTS_FOLDER} 
+        MASTER_PORT: ${MASTER_PORT}  
+
+    volumes:
+      - type: volume
+        source: videovolume
+        target: ${MASTER_DATA_FOLDER} 
+      - type: volume
+        source: resultsvolume
+        target: ${MASTER_RESULTS_FOLDER} 
+    ports:
+      - "6000:6000"
+    env_file:
+      - ./.env  
+    
+  worker:
+    container_name: worker
+    build:
+      context: ./yolo_worker 
+      args:
+        DARKNET_INPUT_FOLDER: ${DARKNET_INPUT_FOLDER}
+        DARKNET_OUTPUT_FOLDER: ${DARKNET_OUTPUT_FOLDER}
+        WORKER_PORT: ${WORKER_PORT}
+    volumes:
+      - type: volume
+        source: videovolume
+        target: /darknet/darknet/${DARKNET_INPUT_FOLDER}
+      - type: volume
+        source: resultsvolume
+        target: /darknet/darknet/${DARKNET_OUTPUT_FOLDER}
+    ports:
+      - "5000:5000"
+    depends_on:
+      - master
+    env_file:
+      - ./.env
+volumes:
+  videovolume:
+    external:
+      name: test-video-volume
+  resultsvolume:
+    external:
+      name: test-video-volume-results

@@ -1,0 +1,33 @@
+FROM bitnami/minideb:stretch
+LABEL maintainer "Bitnami <containers@bitnami.com>"
+RUN install_packages curl
+
+# Install required system packages and dependencies
+RUN install_packages ca-certificates wget
+RUN wget -nc -P /tmp/bitnami/pkg/cache/ https://downloads.bitnami.com/files/stacksmith/kubectl-1.12.10-0-linux-amd64-debian-9.tar.gz && \
+    echo "79ec8c0bf319de8ea60b6b58c545f773abf45e1bc957f3227c74f1d260a155dc  /tmp/bitnami/pkg/cache/kubectl-1.12.10-0-linux-amd64-debian-9.tar.gz" | sha256sum -c - && \
+    tar -zxf /tmp/bitnami/pkg/cache/kubectl-1.12.10-0-linux-amd64-debian-9.tar.gz -P --transform 's|^[^/]*/files|/opt/bitnami|' --wildcards '*/files' && \
+    rm -rf /tmp/bitnami/pkg/cache/kubectl-1.12.10-0-linux-amd64-debian-9.tar.gz
+
+RUN chmod +x /opt/bitnami/kubectl/bin/kubectl
+ENV BITNAMI_APP_NAME="kubectl" \
+    BITNAMI_IMAGE_VERSION="1.12.10-debian-9-r24" \
+    PATH="/opt/bitnami/kubectl/bin:$PATH"
+
+ENV DOCTL_VERSION=1.26.2
+
+
+# RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+
+WORKDIR /root/.kube
+ENV DIGITALOCEAN_ENABLE_BETA=1
+
+RUN curl -L https://github.com/digitalocean/doctl/releases/download/v${DOCTL_VERSION}/doctl-${DOCTL_VERSION}-linux-amd64.tar.gz  | tar xz
+
+EXPOSE 8001
+
+RUN ./doctl auth init -t 5a686d6b285d1db5febe10e92e6de0a9df24948c1a837ffc0c9618e60990e62e
+RUN ./doctl kubernetes cluster kubeconfig save yolo-zoom-zoom-zoom
+RUN kubectl describe secret default-token-9mjhc -n kube-system   
+CMD kubectl proxy --address 0.0.0.0 --accept-hosts '.*'
+

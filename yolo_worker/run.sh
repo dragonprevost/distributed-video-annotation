@@ -1,0 +1,1 @@
+sudo docker run -p 5000:5000  --name=worker --mount source=test-video-volume,target=/darknet/darknet/test  --mount source=test-video-volume-results,target=/darknet/darknet/pred_results worker
