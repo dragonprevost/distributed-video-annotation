@@ -26,7 +26,7 @@ RUN curl -L https://github.com/digitalocean/doctl/releases/download/v${DOCTL_VER
 
 EXPOSE 8001
 
-RUN ./doctl auth init -t 5a686d6b285d1db5febe10e92e6de0a9df24948c1a837ffc0c9618e60990e62e
+RUN ./doctl auth init -t <token>
 RUN ./doctl kubernetes cluster kubeconfig save yolo-zoom-zoom-zoom
 RUN kubectl describe secret default-token-9mjhc -n kube-system   
 CMD kubectl proxy --address 0.0.0.0 --accept-hosts '.*'
